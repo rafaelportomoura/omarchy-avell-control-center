@@ -13,11 +13,11 @@ BarWidget {
 
   // User Settings
   readonly property bool showTempInBar: setting("showTempInBar", true) !== false
-  readonly property int pollIntervalSec: Math.max(1, Math.min(60, Number(setting("pollIntervalSec", 3)) || 3))
+  readonly property int pollIntervalSec: Math.max(2, Math.min(60, Number(setting("pollIntervalSec", 5)) || 5))
 
   // State
   property bool deviceConnected: true
-  property bool permissionOk: false
+  property bool permissionOk: true
   property bool keyboardOn: true
   property int brightness: 25
   property int brightnessPercent: 50
@@ -105,7 +105,12 @@ BarWidget {
     running: true
     repeat: true
     triggeredOnStart: true
-    onTriggered: root.refresh()
+    onTriggered: {
+      // Avoid querying USB concurrently while user is interacting with the open panel
+      if (!root.opened) {
+        root.refresh()
+      }
+    }
   }
 
   Loader {

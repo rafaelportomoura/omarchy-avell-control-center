@@ -42,8 +42,11 @@ Panel {
     return false
   }
 
-  // Execution helper for fire-and-forget commands
+  // Execution helper for commands
   function execCommand(args) {
+    if (actionProc.running) {
+      actionProc.terminate()
+    }
     actionProc.command = args
     actionProc.running = true
   }
@@ -52,7 +55,6 @@ Panel {
     execCommand([root.helper, "profile", profile])
     if (root.hostWidget) {
       root.hostWidget.powerProfile = profile
-      Qt.callLater(root.hostWidget.refresh)
     }
   }
 
@@ -61,18 +63,28 @@ Panel {
     var target = !root.hostWidget.keyboardOn
     root.hostWidget.keyboardOn = target
     execCommand([root.helper, target ? "on" : "off"])
-    Qt.callLater(root.hostWidget.refresh)
+  }
+
+  Timer {
+    id: brightnessDebounce
+    interval: 150
+    repeat: false
+    property int targetBrightness: 25
+    onTriggered: {
+      root.execCommand([root.helper, "brightness", String(targetBrightness)])
+    }
   }
 
   function setBrightness(val) {
     if (!root.hostWidget) return
     root.hostWidget.brightness = val
     root.hostWidget.brightnessPercent = Math.round((val * 100) / 50)
-    execCommand([root.helper, "brightness", String(val)])
+    brightnessDebounce.targetBrightness = val
+    brightnessDebounce.restart()
   }
 
   function setColor(colorHex) {
-    var b = root.hostWidget ? root.hostWidget.brightness : 25
+    var b = root.hostWidget ? root.hostWidget.brightness : 36
     execCommand([root.helper, "color", colorHex, "--brightness", String(b)])
     if (root.hostWidget) {
       root.hostWidget.keyboardOn = true
@@ -82,7 +94,7 @@ Panel {
 
   function applyEffect(name) {
     root.activeEffect = name
-    var b = root.hostWidget ? root.hostWidget.brightness : 25
+    var b = root.hostWidget ? root.hostWidget.brightness : 36
     var args = [root.helper, "effect", name, "--speed", String(root.effectSpeed), "--brightness", String(b)]
     if (root.effectColor !== "random") {
       args.push("--color")
@@ -101,7 +113,7 @@ Panel {
 
   function saveToRom() {
     execCommand([root.helper, "save"])
-    root.saveFeedback = "Configurações gravadas no chip com sucesso!"
+    root.saveFeedback = "Configurações salvas no chip (ROM) com sucesso!"
     feedbackTimer.restart()
   }
 
@@ -113,9 +125,6 @@ Panel {
 
   Process {
     id: actionProc
-    onExited: function(code) {
-      if (root.hostWidget) root.hostWidget.refresh()
-    }
   }
 
   Timer {
@@ -126,7 +135,7 @@ Panel {
 
   Timer {
     id: checkPermsTimer
-    interval: 2000
+    interval: 2500
     onTriggered: {
       if (root.hostWidget) root.hostWidget.refresh()
     }
@@ -201,7 +210,7 @@ Panel {
         }
 
         // -------------------------------------------------------------
-        // Permission Warning Alert (if udev rule is missing)
+        // Permission Warning Alert (Visible only if permission_ok is false)
         // -------------------------------------------------------------
         Rectangle {
           visible: root.hostWidget ? !root.hostWidget.permissionOk : false
@@ -402,7 +411,7 @@ Panel {
           }
         }
 
-        // Keyboard Controls (Visible when keyboard is on)
+        // Keyboard Controls
         Column {
           visible: root.hostWidget ? root.hostWidget.keyboardOn : true
           width: parent.width - Style.space(28)
@@ -438,6 +447,7 @@ Panel {
             integer: true
             value: root.hostWidget ? root.hostWidget.brightness : 25
             onMoved: function(v) { root.setBrightness(Math.round(v)) }
+            onReleased: function(v) { root.setBrightness(Math.round(v)) }
           }
 
           // Tabs: Cores vs Efeitos
