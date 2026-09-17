@@ -1,0 +1,10 @@
+# Binaries and build artifacts
+bin/avell-ctl
+*.o
+*.a
+*.so
+
+# Temporary files
+*.tmp
+*~
+.DS_Store

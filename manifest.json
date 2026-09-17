@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "id": "rafaelportomoura.avell-control-center",
+  "name": "Avell Control Center",
+  "version": "1.0.0",
+  "author": "Rafael Porto Moura",
+  "license": "MIT",
+  "description": "Controle completo do teclado RGB (ITE 8291) e perfis de desempenho para notebooks Avell A60 MUV no Omarchy.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Avell Control Center",
+    "category": "Hardware",
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {
+      "showTempInBar": true,
+      "pollIntervalSec": 3
+    },
+    "schema": [
+      {
+        "key": "showTempInBar",
+        "type": "boolean",
+        "label": "Exibir temperatura na barra",
+        "description": "Exibe a temperatura da CPU (°C) ao lado do ícone na barra superior.",
+        "defaultValue": true
+      },
+      {
+        "key": "pollIntervalSec",
+        "type": "integer",
+        "label": "Intervalo de atualização (segundos)",
+        "min": 1,
+        "max": 60,
+        "step": 1,
+        "defaultValue": 3,
+        "description": "Intervalo para atualizar a telemetria do sistema."
+      }
+    ]
+  }
+}
