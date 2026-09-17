@@ -83,6 +83,17 @@ Ative o widget na barra com o comando:
 omarchy plugin enable rafaelportomoura.avell-control-center right
 ```
 
+### 5. Desinstalação e Remoção
+Para desativar e remover o plugin:
+
+```bash
+# Desativar o widget da barra
+omarchy plugin disable rafaelportomoura.avell-control-center
+
+# Remover o plugin instalado
+omarchy plugin remove rafaelportomoura.avell-control-center --yes
+```
+
 ---
 
 ## 🛠️ CLI Independente (`bin/avell-ctl`)
